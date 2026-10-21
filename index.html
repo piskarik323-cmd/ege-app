@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Платформа Слитых Курсов ЕГЭ 2025-2027</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                        dark: {
+                            bg: '#0b0f17',
+                            card: 'rgba(23, 31, 48, 0.7)',
+                            cardSolid: '#131b2e',
+                            hover: 'rgba(32, 45, 71, 0.8)',
+                            border: 'rgba(255, 255, 255, 0.08)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #080c14;
+            color: #f3f4f6;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 35%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .glass-panel {
+            background: rgba(19, 27, 46, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 15px rgba(99, 102, 241, 0.15);
+        }
+
+        .glass-card.selected {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.15) 100%);
+            border-color: #6366f1;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(8, 12, 20, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px) scale(0.99); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Pulse badge glow */
+        .glow-pulse {
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-100 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 w-full glass-panel border-b border-white/10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="resetAll()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-purple-600 to-pink-500 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-brand-500/30">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-400">СЛИВЫ ЕГЭ</span>
+                        <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">2025–2027</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Каталог подборок онлайн-школ</p>
+                </div>
+            </div>
+
+            <!-- Actions Right Header -->
+            <div class="flex items-center space-x-3">
+                <button onclick="openInfoModal()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-medium border border-white/10 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-info text-brand-500"></i>
+                    <span class="hidden sm:inline">Инструкция</span>
+                </button>
+                <button onclick="toggleCartDrawer()" class="relative p-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white transition flex items-center justify-center shadow-lg shadow-brand-600/30">
+                    <i class="fa-solid fa-cart-shopping text-sm"></i>
+                    <span id="cart-badge-count" class="absolute -top-1.5 -right-1.5 bg-pink-500 text-white font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-900 hidden">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8 flex flex-col gap-6">
+
+        <!-- Progress Steps Breadcrumbs -->
+        <nav aria-label="Progress" class="glass-panel p-3 sm:p-4 rounded-2xl">
+            <ol class="flex items-center justify-between w-full text-xs sm:text-sm font-medium">
+                <!-- Step 1 -->
+                <li class="flex items-center space-x-2 text-brand-400 cursor-pointer" onclick="goToStep(1)">
+                    <span id="step-num-1" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-brand-600/30">1</span>
+                    <span class="hidden md:inline font-semibold">Школа</span>
+                </li>
+                <div class="h-0.5 flex-1 mx-2 sm:mx-3 bg-white/10 rounded" id="line-1"></div>
+
+                <!-- Step 2 -->
+                <li class="flex items-center space-x-2 text-slate-400 cursor-pointer" id="step-item-2" onclick="goToStep(2)">
+                    <span id="step-num-2" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white/5 text-slate-400 border border-white/10 flex items-center justify-center font-bold text-xs">2</span>
+                    <span class="hidden md:inline font-semibold">Предмет</span>
+                </li>
+                <div class="h-0.5 flex-1 mx-2 sm:mx-3 bg-white/10 rounded" id="line-2"></div>
+
+                <!-- Step 3 -->
+                <li class="flex items-center space-x-2 text-slate-400 cursor-pointer" id="step-item-3" onclick="goToStep(3)">
+                    <span id="step-num-3" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white/5 text-slate-400 border border-white/10 flex items-center justify-center font-bold text-xs">3</span>
+                    <span class="hidden md:inline font-semibold">Учебный Год</span>
+                </li>
+                <div class="h-0.5 flex-1 mx-2 sm:mx-3 bg-white/10 rounded" id="line-3"></div>
+
+                <!-- Step 4 -->
+                <li class="flex items-center space-x-2 text-slate-400 cursor-pointer" id="step-item-4" onclick="goToStep(4)">
+                    <span id="step-num-4" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white/5 text-slate-400 border border-white/10 flex items-center justify-center font-bold text-xs">4</span>
+                    <span class="hidden md:inline font-semibold">Месяцы & Оплата</span>
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Current Selection Info Pill -->
+        <div id="selection-summary-bar" class="hidden glass-panel px-4 py-3 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs border border-brand-500/20 bg-brand-500/5">
+            <div class="flex items-center flex-wrap gap-2 text-slate-300">
+                <span class="text-slate-400">Выбрано:</span>
+                <span id="pill-school" class="bg-white/10 px-2.5 py-1 rounded-lg font-medium text-white hidden"></span>
+                <span id="pill-subject" class="bg-white/10 px-2.5 py-1 rounded-lg font-medium text-white hidden"></span>
+                <span id="pill-year" class="bg-brand-500/20 text-brand-300 px-2.5 py-1 rounded-lg font-semibold border border-brand-500/30 hidden"></span>
+            </div>
+            <button onclick="resetAll()" class="text-slate-400 hover:text-rose-400 text-xs font-medium transition flex items-center gap-1">
+                <i class="fa-solid fa-rotate-left"></i> Сбросить выбор
+            </button>
+        </div>
+
+        <!-- DYNAMIC STEP CONTENT AREA -->
+        <div id="step-content" class="min-h-[420px] flex flex-col justify-between">
+            <!-- Rendered by JS -->
+        </div>
+
+    </main>
+
+    <!-- SHOPPING CART / BASKET DRAWER (SLIDE OVER) -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 pointer-events-none hidden">
+        <!-- Backdrop -->
+        <div id="cart-backdrop" onclick="toggleCartDrawer()" class="absolute inset-0 bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-300 pointer-events-auto"></div>
+
+        <!-- Drawer Content Container -->
+        <div id="cart-panel" class="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#0f172a] border-l border-white/10 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-300 pointer-events-auto shadow-2xl">
+            <!-- Drawer Header -->
+            <div class="flex items-center justify-between border-b border-white/10 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-base">
+                        <i class="fa-solid fa-basket-shopping"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white">Корзина курсов</h3>
+                        <p class="text-xs text-slate-400" id="cart-subtitle">0 выбранных позиций</p>
+                    </div>
+                </div>
+                <button onclick="toggleCartDrawer()" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Drawer Scrollable Cart Items -->
+            <div id="cart-items-container" class="flex-1 my-4 overflow-y-auto space-y-3 pr-1">
+                <!-- Cart items or empty state injected here -->
+            </div>
+
+            <!-- Drawer Footer Summary -->
+            <div class="border-t border-white/10 pt-4 space-y-4">
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs text-slate-400">
+                        <span>Сумма без скидки:</span>
+                        <span id="cart-subtotal-price" class="text-slate-300">0 ₽</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm font-bold text-white pt-1 border-t border-white/5">
+                        <span>Итого к оплате:</span>
+                        <span id="cart-total-price" class="text-xl text-brand-400 font-extrabold">0 ₽</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="copyOrderDetails()" class="w-full py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-semibold text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Копировать</span>
+                    </button>
+                    <button onclick="sendTelegramOrder()" class="w-full py-3 px-4 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-brand-500/25 transition flex items-center justify-center gap-2">
+                        <i class="fa-paper-plane fa-solid"></i>
+                        <span>В Telegram</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INSTRUCTIONS MODAL -->
+    <div id="info-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
+        <div class="glass-panel w-full max-w-lg rounded-3xl p-6 border border-white/10 space-y-5 shadow-2xl relative">
+            <button onclick="closeInfoModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-brand-500/20 text-brand-400 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-circle-question"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-base text-white">Как пользователем каталогом</h3>
+                    <p class="text-xs text-slate-400">Вся система полностью автономна</p>
+                </div>
+            </div>
+            
+            <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+                <div class="p-3 rounded-xl bg-white/5 border border-white/5 flex gap-3">
+                    <span class="w-6 h-6 rounded-lg bg-brand-600 text-white font-bold flex items-center justify-center shrink-0">1</span>
+                    <p>Выберите нужную <strong>Онлайн-Школу</strong> (Умскул, 100балльный репетитор или ЕГЭЛенд).</p>
+                </div>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/5 flex gap-3">
+                    <span class="w-6 h-6 rounded-lg bg-brand-600 text-white font-bold flex items-center justify-center shrink-0">2</span>
+                    <p>Отфильтруйте и выберите нужный <strong>Предмет</strong> (Русский, Математика, Физика и т.д.).</p>
+                </div>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/5 flex gap-3">
+                    <span class="w-6 h-6 rounded-lg bg-brand-600 text-white font-bold flex items-center justify-center shrink-0">3</span>
+                    <p>Укажите <strong>Учебный Год</strong>: <br>• 2025–2026 год: 200 ₽/мес на все школы.<br>• 2026–2027 год: Умскул (800 ₽/мес), 100балльник и ЕГЭЛенд (1000 ₽/мес).</p>
+                </div>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/5 flex gap-3">
+                    <span class="w-6 h-6 rounded-lg bg-brand-600 text-white font-bold flex items-center justify-center shrink-0">4</span>
+                    <p>Выбирайте сразу несколько месяцев или жмите <strong>«Выбрать все»</strong>. Позиции моментально добавятся в корзину!</p>
+                </div>
+            </div>
+
+            <button onclick="closeInfoModal()" class="w-full py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl transition">
+                Понятно, приступить
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification Overlay -->
+    <div id="toast-box" class="fixed bottom-6 right-6 z-50 pointer-events-none flex flex-col space-y-2"></div>
+
+    <!-- Application Script Logic -->
+    <script>
+        // Data Models
+        const SCHOOLS = [
+            {
+                id: 'umskul',
+                name: 'Умскул',
+                logo: 'fa-graduation-cap',
+                color: 'from-rose-500/20 to-orange-500/20 border-rose-500/30 text-rose-400',
+                badge: 'Популярное',
+                desc: 'Самая крупная онлайн-школа подготовки к ЕГЭ и ОГЭ',
+                prices: { '2025-2026': 200, '2026-2027': 800 }
+            },
+            {
+                id: '100ballnik',
+                name: '100балльный репетитор',
+                logo: 'fa-award',
+                color: 'from-blue-500/20 to-cyan-500/20 border-blue-500/30 text-cyan-400',
+                badge: 'Высокий балл',
+                desc: 'Авторские курсы от лучших преподавателей-стобалльников',
+                prices: { '2025-2026': 200, '2026-2027': 1000 }
+            },
+            {
+                id: 'egeland',
+                name: 'ЕГЭЛэнд',
+                logo: 'fa-bolt',
+                color: 'from-purple-500/20 to-pink-500/20 border-purple-500/30 text-pink-400',
+                badge: 'Интерактив',
+                desc: 'Современный и вовлекающий формат подготовки',
+                prices: { '2025-2026': 200, '2026-2027': 1000 }
+            }
+        ];
+
+        const SUBJECTS = [
+            { id: 'russian', name: 'Русский язык', icon: 'fa-book-open', desc: 'Тестовая часть и идеальное сочинение' },
+            { id: 'math', name: 'Математика (Профиль/База)', icon: 'fa-square-root-variable', desc: 'Первая часть, параметры, геометрия' },
+            { id: 'social', name: 'Обществознание', icon: 'fa-scale-balanced', desc: 'Право, экономика, человек и общество' },
+            { id: 'physics', name: 'Физика', icon: 'fa-atom', desc: 'Механика, электродинамика, кванты' },
+            { id: 'chemistry', name: 'Химия', icon: 'fa-flask', desc: 'Органическая и неорганическая химия' },
+            { id: 'biology', name: 'Биология', icon: 'fa-dna', desc: 'Анатомия, ботаника, зоология, генетика' },
+            { id: 'history', name: 'История', icon: 'fa-landmark', desc: 'Все периоды, карты, культура и даты' },
+            { id: 'informatics', name: 'Информатика', icon: 'fa-code', desc: 'Программирование на Python и алгоритмы' },
+            { id: 'english', name: 'Английский язык', icon: 'fa-language', desc: 'Грамматика, говорение и эссе' },
+            { id: 'literature', name: 'Литература', icon: 'fa-feather-pointed', desc: 'Анализ произведений и сочинения' }
+        ];
+
+        const ACADEMIC_YEARS = {
+            '2025-2026': {
+                label: '2025–2026 учебный год',
+                tag: '200 ₽ / месяц',
+                months: ['Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май']
+            },
+            '2026-2027': {
+                label: '2026–2027 учебный год',
+                tag: 'Актуальный поток',
+                months: ['Сентябрь', 'Октябрь', 'Ноябрь']
+            }
+        };
+
+        // App State
+        let state = {
+            step: 1,
+            school: null,
+            subject: null,
+            year: '2025-2026',
+            selectedMonths: [],
+            cart: [],
+            searchSubjectQuery: ''
+        };
+
+        // Initialize App on DOM Load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderStep();
+        });
+
+        // Navigation logic
+        function goToStep(targetStep) {
+            if (targetStep === 2 && !state.school) {
+                showToast('Сначала выберите онлайн-школу', 'warning');
+                return;
+            }
+            if (targetStep === 3 && !state.subject) {
+                showToast('Сначала выберите предмет', 'warning');
+                return;
+            }
+            if (targetStep === 4 && (!state.school || !state.subject)) {
+                showToast('Заполните предыдущие шаги', 'warning');
+                return;
+            }
+
+            state.step = targetStep;
+            renderStep();
+        }
+
+        function updateBreadcrumbsUI() {
+            for (let i = 1; i <= 4; i++) {
+                const item = document.getElementById(`step-item-${i}`);
+                const num = document.getElementById(`step-num-${i}`);
+                const line = document.getElementById(`line-${i}`);
+
+                if (i < state.step) {
+                    if (num) {
+                        num.className = "w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs";
+                        num.innerHTML = '<i class="fa-solid fa-check text-xs"></i>';
+                    }
+                    if (line) line.className = "h-0.5 flex-1 mx-2 sm:mx-3 bg-emerald-500/40 rounded";
+                } else if (i === state.step) {
+                    if (num) {
+                        num.className = "w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold text-xs shadow-lg shadow-brand-600/40 glow-pulse";
+                        num.innerText = i;
+                    }
+                    if (line) line.className = "h-0.5 flex-1 mx-2 sm:mx-3 bg-white/10 rounded";
+                } else {
+                    if (num) {
+                        num.className = "w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white/5 text-slate-400 border border-white/10 flex items-center justify-center font-bold text-xs";
+                        num.innerText = i;
+                    }
+                    if (line) line.className = "h-0.5 flex-1 mx-2 sm:mx-3 bg-white/10 rounded";
+                }
+            }
+
+            // Update Header Summary Bar
+            const summaryBar = document.getElementById('selection-summary-bar');
+            const pillSchool = document.getElementById('pill-school');
+            const pillSubject = document.getElementById('pill-subject');
+            const pillYear = document.getElementById('pill-year');
+
+            if (state.school || state.subject) {
+                summaryBar.classList.remove('hidden');
+                
+                if (state.school) {
+                    pillSchool.innerText = state.school.name;
+                    pillSchool.classList.remove('hidden');
+                } else pillSchool.classList.add('hidden');
+
+                if (state.subject) {
+                    pillSubject.innerText = state.subject.name;
+                    pillSubject.classList.remove('hidden');
+                } else pillSubject.classList.add('hidden');
+
+                if (state.year) {
+                    pillYear.innerText = state.year;
+                    pillYear.classList.remove('hidden');
+                }
+            } else {
+                summaryBar.classList.add('hidden');
+            }
+        }
+
+        // Render Current Step Screen
+        function renderStep() {
+            updateBreadcrumbsUI();
+            const container = document.getElementById('step-content');
+            container.innerHTML = '';
+
+            if (state.step === 1) {
+                container.innerHTML = renderSchoolStepHTML();
+            } else if (state.step === 2) {
+                container.innerHTML = renderSubjectStepHTML();
+            } else if (state.step === 3) {
+                container.innerHTML = renderYearStepHTML();
+            } else if (state.step === 4) {
+                container.innerHTML = renderMonthStepHTML();
+            }
+        }
+
+        // STEP 1: SCHOOL SELECTION
+        function renderSchoolStepHTML() {
+            return `
+                <div class="animate-fade-in space-y-6">
+                    <div class="space-y-1">
+                        <h2 class="text-2xl font-extrabold text-white tracking-tight">Шаг 1: Выберите онлайн-школу</h2>
+                        <p class="text-xs sm:text-sm text-slate-400">Выберите подготовку от ведущих обучающих платформ</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        ${SCHOOLS.map(s => {
+                            const isSelected = state.school && state.school.id === s.id;
+                            return `
+                                <div onclick="selectSchool('${s.id}')" class="glass-card p-5 rounded-3xl cursor-pointer flex flex-col justify-between space-y-4 group relative overflow-hidden ${isSelected ? 'selected' : ''}">
+                                    <div class="flex items-start justify-between">
+                                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center text-xl shadow-lg">
+                                            <i class="fa-solid ${s.logo}"></i>
+                                        </div>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300">${s.badge}</span>
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <h3 class="font-extrabold text-lg text-white group-hover:text-brand-300 transition-colors">${s.name}</h3>
+                                        <p class="text-xs text-slate-400 leading-relaxed">${s.desc}</p>
+                                    </div>
+
+                                    <div class="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+                                        <div class="text-slate-400">
+                                            2025–2026: <span class="text-emerald-400 font-bold">200 ₽/мес</span><br>
+                                            2026–2027: <span class="text-brand-300 font-bold">${s.prices['2026-2027']} ₽/мес</span>
+                                        </div>
+                                        <div class="w-8 h-8 rounded-xl bg-white/5 group-hover:bg-brand-600 group-hover:text-white flex items-center justify-center text-slate-400 transition">
+                                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectSchool(schoolId) {
+            state.school = SCHOOLS.find(s => s.id === schoolId);
+            showToast(`Выбрана школа: ${state.school.name}`, 'info');
+            goToStep(2);
+        }
+
+        // STEP 2: SUBJECT SELECTION
+        function renderSubjectStepHTML() {
+            const filteredSubjects = SUBJECTS.filter(subj => 
+                subj.name.toLowerCase().includes(state.searchSubjectQuery.toLowerCase())
+            );
+
+            return `
+                <div class="animate-fade-in space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <h2 class="text-2xl font-extrabold text-white tracking-tight">Шаг 2: Выберите предмет</h2>
+                            <p class="text-xs sm:text-sm text-slate-400">Школа: <span class="text-brand-300 font-bold">${state.school.name}</span></p>
+                        </div>
+
+                        <!-- Search Bar -->
+                        <div class="relative w-full sm:w-64">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" value="${state.searchSubjectQuery}" oninput="handleSubjectSearch(this.value)" placeholder="Поиск предмета..." class="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        ${filteredSubjects.map(subj => {
+                            const isSelected = state.subject && state.subject.id === subj.id;
+                            return `
+                                <div onclick="selectSubject('${subj.id}')" class="glass-card p-4 rounded-2xl cursor-pointer flex items-center space-x-3.5 group ${isSelected ? 'selected' : ''}">
+                                    <div class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 group-hover:bg-brand-600/20 group-hover:border-brand-500/40 text-brand-400 flex items-center justify-center text-lg shrink-0 transition">
+                                        <i class="fa-solid ${subj.icon}"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-bold text-sm text-white group-hover:text-brand-300 transition-colors truncate">${subj.name}</h4>
+                                        <p class="text-[11px] text-slate-400 truncate mt-0.5">${subj.desc}</p>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-300 transition"></i>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4">
+                        <button onclick="goToStep(1)" class="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold transition flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-left"></i> Назад
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleSubjectSearch(val) {
+            state.searchSubjectQuery = val;
+            renderStep();
+        }
+
+        function selectSubject(subjId) {
+            state.subject = SUBJECTS.find(s => s.id === subjId);
+            showToast(`Выбран предмет: ${state.subject.name}`, 'info');
+            goToStep(3);
+        }
+
+        // STEP 3: ACADEMIC YEAR
+        function renderYearStepHTML() {
+            return `
+                <div class="animate-fade-in space-y-6">
+                    <div class="space-y-1">
+                        <h2 class="text-2xl font-extrabold text-white tracking-tight">Шаг 3: Учебный Год</h2>
+                        <p class="text-xs sm:text-sm text-slate-400">Курс: <span class="text-white font-bold">${state.school.name}</span> • <span class="text-brand-300 font-bold">${state.subject.name}</span></p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Year 2025-2026 -->
+                        <div onclick="selectYear('2025-2026')" class="glass-card p-6 rounded-3xl cursor-pointer space-y-4 group relative ${state.year === '2025-2026' ? 'selected' : ''}">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">9 Месяцев</span>
+                                <span class="text-lg font-black text-emerald-400">200 ₽ / мес</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-black text-white group-hover:text-brand-300 transition">2025–2026 Учебный Год</h3>
+                                <p class="text-xs text-slate-400 mt-1 leading-relaxed">Полный архив уроков, шпаргалок, конспектов и ДЗ (Сентябрь – Май).</p>
+                            </div>
+                            <div class="pt-2 text-xs text-slate-500 flex items-center justify-between">
+                                <span>Единая цена на все предметы</span>
+                                <i class="fa-solid fa-circle-check text-base text-brand-400"></i>
+                            </div>
+                        </div>
+
+                        <!-- Year 2026-2027 -->
+                        <div onclick="selectYear('2026-2027')" class="glass-card p-6 rounded-3xl cursor-pointer space-y-4 group relative ${state.year === '2026-2027' ? 'selected' : ''}">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-brand-500/10 text-brand-300 border border-brand-500/30">NEW • 3 Месяца</span>
+                                <span class="text-lg font-black text-brand-300">${state.school.prices['2026-2027']} ₽ / мес</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-black text-white group-hover:text-brand-300 transition">2026–2027 Учебный Год</h3>
+                                <p class="text-xs text-slate-400 mt-1 leading-relaxed">Свежие материалы текущего учебного года (Сентябрь, Октябрь, Ноябрь).</p>
+                            </div>
+                            <div class="pt-2 text-xs text-slate-500 flex items-center justify-between">
+                                <span>Актуальный онлайн-поток</span>
+                                <i class="fa-solid fa-bolt text-base text-amber-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4">
+                        <button onclick="goToStep(2)" class="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold transition flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-left"></i> Назад
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectYear(yearKey) {
+            state.year = yearKey;
+            state.selectedMonths = []; // Reset selected months on year change
+            showToast(`Учебный год установлен: ${yearKey}`, 'info');
+            goToStep(4);
+        }
+
+        // STEP 4: MONTHS SELECTION & ADD TO CART
+        function renderMonthStepHTML() {
+            const yearInfo = ACADEMIC_YEARS[state.year];
+            const currentPrice = state.school.prices[state.year];
+
+            return `
+                <div class="animate-fade-in space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="space-y-1">
+                            <h2 class="text-2xl font-extrabold text-white tracking-tight">Шаг 4: Выберите месяца</h2>
+                            <p class="text-xs sm:text-sm text-slate-400">
+                                <span class="text-white font-semibold">${state.school.name}</span> • 
+                                <span class="text-white font-semibold">${state.subject.name}</span> • 
+                                <span class="text-brand-300 font-semibold">${state.year}</span>
+                            </p>
+                        </div>
+
+                        <!-- Quick Toggle Buttons -->
+                        <div class="flex items-center space-x-2">
+                            <button onclick="selectAllMonths()" class="px-3 py-1.5 rounded-xl bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 text-xs font-semibold transition">
+                                <i class="fa-solid fa-check-double mr-1"></i> Выбрать все
+                            </button>
+                            <button onclick="deselectAllMonths()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 text-xs font-semibold transition">
+                                Сбросить
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Months Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        ${yearInfo.months.map(m => {
+                            const isChecked = state.selectedMonths.includes(m);
+                            return `
+                                <div onclick="toggleMonth('${m}')" class="glass-card p-4 rounded-2xl cursor-pointer flex items-center justify-between group transition-all ${isChecked ? 'selected border-brand-500' : ''}">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-6 h-6 rounded-lg ${isChecked ? 'bg-brand-600 text-white' : 'bg-white/5 border border-white/10 text-transparent'} flex items-center justify-center text-xs transition">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                        <span class="font-bold text-sm text-white">${m}</span>
+                                    </div>
+                                    <span class="text-xs font-extrabold ${isChecked ? 'text-brand-300' : 'text-emerald-400'}">${currentPrice} ₽</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <!-- Action Bar Bottom -->
+                    <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-white/10">
+                        <div class="text-xs text-slate-300">
+                            Выбрано месяцев: <strong class="text-white text-sm">${state.selectedMonths.length}</strong> 
+                            • Сумма: <strong class="text-brand-400 text-base font-extrabold">${state.selectedMonths.length * currentPrice} ₽</strong>
+                        </div>
+                        <div class="flex items-center space-x-3 w-full sm:w-auto">
+                            <button onclick="goToStep(3)" class="px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold transition">
+                                Назад
+                            </button>
+                            <button onclick="addCurrentSelectionToCart()" ${state.selectedMonths.length === 0 ? 'disabled' : ''} class="flex-1 sm:flex-initial px-6 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-extrabold shadow-lg shadow-brand-500/25 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-cart-plus"></i>
+                                <span>Добавить в корзину</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleMonth(month) {
+            if (state.selectedMonths.includes(month)) {
+                state.selectedMonths = state.selectedMonths.filter(m => m !== month);
+            } else {
+                state.selectedMonths.push(month);
+            }
+            renderStep();
+        }
+
+        function selectAllMonths() {
+            state.selectedMonths = [...ACADEMIC_YEARS[state.year].months];
+            renderStep();
+        }
+
+        function deselectAllMonths() {
+            state.selectedMonths = [];
+            renderStep();
+        }
+
+        // CART SYSTEM
+        function addCurrentSelectionToCart() {
+            if (state.selectedMonths.length === 0) return;
+
+            const pricePerMonth = state.school.prices[state.year];
+            
+            state.selectedMonths.forEach(m => {
+                const itemKey = `${state.school.id}-${state.subject.id}-${state.year}-${m}`;
+                const exists = state.cart.some(item => item.key === itemKey);
+
+                if (!exists) {
+                    state.cart.push({
+                        key: itemKey,
+                        school: state.school.name,
+                        subject: state.subject.name,
+                        year: state.year,
+                        month: m,
+                        price: pricePerMonth
+                    });
+                }
+            });
+
+            showToast(`Успешно добавлено в корзину (${state.selectedMonths.length} мес.)`, 'success');
+            state.selectedMonths = [];
+            renderStep();
+            updateCartUI();
+            toggleCartDrawer();
+        }
+
+        function removeCartItem(key) {
+            state.cart = state.cart.filter(item => item.key !== key);
+            updateCartUI();
+            showToast('Позиция удалена из корзины', 'info');
+        }
+
+        function updateCartUI() {
+            const countBadge = document.getElementById('cart-badge-count');
+            const cartSubtitle = document.getElementById('cart-subtitle');
+            const container = document.getElementById('cart-items-container');
+            const subtotalEl = document.getElementById('cart-subtotal-price');
+            const totalEl = document.getElementById('cart-total-price');
+
+            const totalItems = state.cart.length;
+            const totalPrice = state.cart.reduce((sum, i) => sum + i.price, 0);
+
+            // Badge Count
+            if (totalItems > 0) {
+                countBadge.innerText = totalItems;
+                countBadge.classList.remove('hidden');
+            } else {
+                countBadge.classList.add('hidden');
+            }
+
+            cartSubtitle.innerText = `${totalItems} позиций выбранo`;
+            subtotalEl.innerText = `${totalPrice} ₽`;
+            totalEl.innerText = `${totalPrice} ₽`;
+
+            if (totalItems === 0) {
+                container.innerHTML = `
+                    <div class="h-64 flex flex-col items-center justify-center text-center p-6 space-y-3">
+                        <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-slate-500 text-2xl">
+                            <i class="fa-solid fa-basket-shopping"></i>
+                        </div>
+                        <p class="text-sm text-slate-400 font-medium">Ваша корзина пуста</p>
+                        <p class="text-xs text-slate-500">Выберите предметы и месяца для формирования заказа</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = state.cart.map(item => `
+                <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between space-x-3 hover:border-brand-500/30 transition">
+                    <div class="min-w-0 flex-1 space-y-0.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300">${item.school}</span>
+                            <span class="text-[10px] text-slate-400">${item.year}</span>
+                        </div>
+                        <h4 class="font-bold text-xs text-white truncate">${item.subject}</h4>
+                        <p class="text-[11px] text-slate-400">Месяц: <strong class="text-slate-200">${item.month}</strong></p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-black text-emerald-400">${item.price} ₽</span>
+                        <button onclick="removeCartItem('${item.key}')" class="text-slate-500 hover:text-rose-400 p-1.5 transition">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // CART DRAWER TOGGLE
+        function toggleCartDrawer() {
+            const drawer = document.getElementById('cart-drawer');
+            const backdrop = document.getElementById('cart-backdrop');
+            const panel = document.getElementById('cart-panel');
+
+            if (drawer.classList.contains('hidden')) {
+                drawer.classList.remove('hidden');
+                setTimeout(() => {
+                    backdrop.classList.remove('opacity-0');
+                    panel.classList.remove('translate-x-full');
+                }, 10);
+            } else {
+                backdrop.classList.add('opacity-0');
+                panel.classList.add('translate-x-full');
+                setTimeout(() => {
+                    drawer.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        // ORDER EXPORT & TELEGRAM INTEGRATION
+        function generateOrderSummaryText() {
+            if (state.cart.length === 0) return '';
+
+            let text = `📦 **НОВЫЙ ЗАКАЗ НА КУРСЫ ЕГЭ**\n`;
+            text += `────────────────────\n`;
+
+            const totalPrice = state.cart.reduce((s, i) => s + i.price, 0);
+
+            state.cart.forEach((item, idx) => {
+                text += `${idx + 1}. ${item.school} | ${item.subject} (${item.year})\n`;
+                text += `   📍 Месяц: ${item.month} — ${item.price} ₽\n`;
+            });
+
+            text += `────────────────────\n`;
+            text += `💰 **Итоговая стоимость:** ${totalPrice} ₽\n`;
+            text += `✨ Сформировано через Веб-каталог`;
+
+            return text;
+        }
+
+        function copyOrderDetails() {
+            if (state.cart.length === 0) {
+                showToast('Корзина пуста!', 'warning');
+                return;
+            }
+
+            const text = generateOrderSummaryText();
+            
+            // Clipboard fallback
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+
+            showToast('Состав заказа скопирован в буфер обмена!', 'success');
+        }
+
+        function sendTelegramOrder() {
+            if (state.cart.length === 0) {
+                showToast('Добавьте хотя бы один месяц в корзину', 'warning');
+                return;
+            }
+
+            const text = encodeURIComponent(generateOrderSummaryText());
+            // Opens direct telegram share dialog or bot interaction link
+            window.open(`https://t.me/share/url?url=&text=${text}`, '_blank');
+        }
+
+        // RESET ALL FILTERS
+        function resetAll() {
+            state = {
+                step: 1,
+                school: null,
+                subject: null,
+                year: '2025-2026',
+                selectedMonths: [],
+                cart: [],
+                searchSubjectQuery: ''
+            };
+            renderStep();
+            updateCartUI();
+            showToast('Все фильтры сброшены', 'info');
+        }
+
+        // MODAL HELPERS
+        function openInfoModal() {
+            document.getElementById('info-modal').classList.remove('hidden');
+        }
+
+        function closeInfoModal() {
+            document.getElementById('info-modal').classList.add('hidden');
+        }
+
+        // TOAST SYSTEM
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-box');
+            const toast = document.createElement('div');
+
+            let icon = '<i class="fa-solid fa-circle-info text-brand-400"></i>';
+            if (type === 'success') icon = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+            if (type === 'warning') icon = '<i class="fa-solid fa-triangle-exclamation text-amber-400"></i>';
+
+            toast.className = 'pointer-events-auto glass-panel px-4 py-3 rounded-2xl border border-white/10 text-xs font-medium text-white flex items-center space-x-2.5 shadow-2xl animate-fade-in';
+            toast.innerHTML = `${icon} <span>${msg}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+```eor
